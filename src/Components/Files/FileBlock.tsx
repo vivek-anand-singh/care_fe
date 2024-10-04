@@ -9,7 +9,8 @@ import { FILE_EXTENSIONS } from "../../Common/constants";
 import { t } from "i18next";
 
 export interface FileBlockProps {
-  file: FileUploadModel;
+  files: FileUploadModel[];
+  fileIndex: number;
   fileManager: FileManagerResult;
   associating_id: string;
   editable: boolean;
@@ -18,13 +19,14 @@ export interface FileBlockProps {
 
 export default function FileBlock(props: FileBlockProps) {
   const {
-    file,
+    files,
+    fileIndex,
     fileManager,
     associating_id,
     editable = false,
     archivable = false,
   } = props;
-
+  const file = files[fileIndex];
   const filetype = fileManager.getFileType(file);
 
   const fileData = useQuery(routes.retrieveUpload, {
@@ -86,7 +88,9 @@ export default function FileBlock(props: FileBlockProps) {
         {!file.is_archived &&
           (fileManager.isPreviewable(file) ? (
             <ButtonV2
-              onClick={() => fileManager.viewFile(file, associating_id)}
+              onClick={() =>
+                fileManager.viewFile(files, fileIndex, associating_id)
+              }
               className="w-full md:w-auto"
             >
               <CareIcon icon="l-eye" />

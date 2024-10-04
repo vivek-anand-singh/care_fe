@@ -339,24 +339,27 @@ export const FileUpload = (props: FileUploadProps) => {
         {!(fileQuery?.data?.results || []).length && loading && (
           <div className="skeleton-animate-alpha h-32 rounded-lg" />
         )}
-        {fileQuery?.data?.results.map((item: FileUploadModel) => (
-          <FileBlock
-            file={item}
-            key={item.id}
-            fileManager={
-              tab !== "DISCHARGE_SUMMARY"
-                ? fileManager
-                : dischargeSummaryFileManager
-            }
-            associating_id={associatedId}
-            editable={
-              item?.uploaded_by?.username === authUser.username ||
-              authUser.user_type === "DistrictAdmin" ||
-              authUser.user_type === "StateAdmin"
-            }
-            archivable={tab !== "DISCHARGE_SUMMARY"}
-          />
-        ))}
+        <div>
+          {fileQuery?.data?.results.map((item: FileUploadModel, index) => (
+            <FileBlock
+              files={fileQuery?.data?.results || []}
+              fileIndex={index}
+              key={item.id}
+              fileManager={
+                tab !== "DISCHARGE_SUMMARY"
+                  ? fileManager
+                  : dischargeSummaryFileManager
+              }
+              associating_id={associatedId}
+              editable={
+                item?.uploaded_by?.username === authUser.username ||
+                authUser.user_type === "DistrictAdmin" ||
+                authUser.user_type === "StateAdmin"
+              }
+              archivable={tab !== "DISCHARGE_SUMMARY"}
+            />
+          ))}
+        </div>
         {!(fileQuery?.data?.results || []).length && (
           <div className="mt-4">
             <div className="text-md flex items-center justify-center font-semibold capitalize text-secondary-500">

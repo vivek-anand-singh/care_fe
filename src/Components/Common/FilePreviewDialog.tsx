@@ -19,6 +19,10 @@ export const zoom_values = [
 ];
 
 type FilePreviewProps = {
+  isLeftButtonDisabled: boolean;
+  isRightButtonDisabled: boolean;
+  openNextFile?: () => boolean | (() => void);
+  openPrevFile?: () => boolean | (() => void);
   title?: ReactNode;
   description?: ReactNode;
   show: boolean;
@@ -46,8 +50,18 @@ const previewExtensions = [
 ];
 
 const FilePreviewDialog = (props: FilePreviewProps) => {
-  const { show, onClose, file_state, setFileState, downloadURL, fileUrl } =
-    props;
+  const {
+    show,
+    onClose,
+    file_state,
+    setFileState,
+    downloadURL,
+    fileUrl,
+    openNextFile,
+    openPrevFile,
+    isLeftButtonDisabled,
+    isRightButtonDisabled,
+  } = props;
   const { t } = useTranslation();
 
   const [page, setPage] = useState(1);
@@ -125,6 +139,20 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
             </div>
           </div>
           <div className="flex flex-1 items-center justify-center">
+            <div className="flex flex-1 items-center justify-center">
+              <button
+                disabled={isLeftButtonDisabled}
+                className={`${isLeftButtonDisabled ? "bg-green-500" : "bg-green-600"} rounded-full px-4 py-2 text-white`}
+                onClick={() => {
+                  const res = openPrevFile?.();
+                  if (typeof res === "boolean" || typeof res === "undefined")
+                    return;
+                  res();
+                }}
+              >
+                &lt;
+              </button>
+            </div>
             <div className="flex h-[75vh] w-full items-center justify-center overflow-scroll rounded-lg border border-secondary-200">
               {file_state.isImage ? (
                 <img
@@ -161,6 +189,18 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 </div>
               )}
             </div>
+            <button
+              disabled={isRightButtonDisabled}
+              className={`${isRightButtonDisabled ? "bg-green-500" : "bg-green-600"} rounded-full px-4 py-2 text-white`}
+              onClick={() => {
+                const res = openNextFile?.();
+                if (typeof res === "boolean" || typeof res === "undefined")
+                  return;
+                res();
+              }}
+            >
+              &gt;
+            </button>
           </div>
           <div className="flex items-center justify-between">
             <div className="mt-2 flex w-full flex-col justify-center gap-3 md:flex-row">

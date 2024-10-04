@@ -100,7 +100,8 @@ export default function PatientConsentRecordBlockGroup(props: {
         <FileBlock
           fileManager={fileManager}
           key={i}
-          file={file}
+          files={files}
+          fileIndex={i}
           editable={hasEditPermission(file)}
           associating_id={consentRecord.id}
           archivable

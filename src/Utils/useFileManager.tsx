@@ -22,7 +22,11 @@ export interface FileManagerOptions {
   onEdit?: () => void;
 }
 export interface FileManagerResult {
-  viewFile: (file: FileUploadModel, associating_id: string) => void;
+  viewFile: (
+    files: FileUploadModel[],
+    fileIndex: number,
+    associating_id: string,
+  ) => void;
   archiveFile: (
     file: FileUploadModel,
     associating_id: string,
@@ -56,6 +60,12 @@ export default function useFileManager(
     isZoomOutDisabled: false,
     rotation: 0,
   });
+  const [files, setFiles] = useState<FileUploadModel[]>([]);
+  const [fileIndex, setFileIndex] = useState<number>(0);
+  const [associating_id, setAssociatingId] = useState<string>("");
+
+  console.log({ fileIndex });
+
   const [fileUrl, setFileUrl] = useState<string>("");
   const [downloadURL, setDownloadURL] = useState<string>("");
   const [archiveDialogueOpen, setArchiveDialogueOpen] = useState<
@@ -75,9 +85,19 @@ export default function useFileManager(
     return ext;
   };
 
-  const viewFile = async (file: FileUploadModel, associating_id: string) => {
+  const viewFile = async (
+    files: FileUploadModel[],
+    fileIndex: number,
+    associating_id: string,
+  ) => {
+    if (fileIndex < 0 || fileIndex >= files.length) return;
+
+    const file = files[fileIndex];
+    setFiles(files);
+    setFileIndex(fileIndex);
     setFileUrl("");
     setFileState({ ...file_state, open: true });
+    setAssociatingId(associating_id);
     const { data } = await request(routes.retrieveUpload, {
       query: {
         file_type: fileType,
@@ -110,6 +130,22 @@ export default function useFileManager(
     });
     downloadFileUrl(signedUrl);
     setFileUrl(signedUrl);
+  };
+
+  const openNextFile = () => {
+    const newFileIndex = fileIndex + 1;
+    if (newFileIndex >= files.length) return false;
+    return function () {
+      viewFile(files, newFileIndex, associating_id);
+    };
+  };
+
+  const openPrevFile = () => {
+    const newFileIndex = fileIndex - 1;
+    if (newFileIndex < 0) return false;
+    return function () {
+      viewFile(files, newFileIndex, associating_id);
+    };
   };
 
   const validateArchiveReason = (name: any) => {
@@ -216,6 +252,12 @@ export default function useFileManager(
   const Dialogues = (
     <>
       <FilePreviewDialog
+        isLeftButtonDisabled={files.length === 0 || fileIndex === 0}
+        isRightButtonDisabled={
+          files.length === 0 || fileIndex === files.length - 1
+        }
+        openNextFile={openNextFile}
+        openPrevFile={openPrevFile}
         show={file_state.open}
         fileUrl={fileUrl}
         file_state={file_state}
